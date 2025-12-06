@@ -3,6 +3,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "..";
 import { newProperty, PropertyTable } from "@/db/schema";
+import { strict } from "assert";
 
 // New Property Action
 export const newPropertyAction = async (data: newProperty) => {
@@ -23,4 +24,10 @@ export const AllPropertyAction =  async () => {
   const all = await db.select().from(PropertyTable)
   // console.log(all)
   return all
+}
+
+// User All roperty Action
+export const UserAllPropertyAction = async (email:string) => {
+  const userall = await db.select().from(PropertyTable).where(eq(PropertyTable.email,email))
+  return userall
 }
