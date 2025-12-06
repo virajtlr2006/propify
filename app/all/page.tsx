@@ -2,6 +2,7 @@
 import { AllPropertyAction } from '@/Actions/PropertyAction'
 import { property } from '@/db/schema'
 import { useCurrentUser } from '@/hook/hook'
+import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 const page = () => {
@@ -13,6 +14,7 @@ const page = () => {
     }, [])
 
     const {email} = useCurrentUser()
+    const {id} = useParams()
 
     const allProperties = async () => {
        const all:property[] =  await AllPropertyAction()
@@ -21,11 +23,11 @@ const page = () => {
   return (
     <div>
       {showallProperties && showallProperties.map((p)=>
-    <div key={p.id}>
+    <a key={p.id}  href={`/single/${p.id}`}>
         <img src={p.image}/>
         <p>{p.pname}</p>
         <p>By:{p.email}</p>
-    </div>
+    </a>
     )}
     </div>
   )
