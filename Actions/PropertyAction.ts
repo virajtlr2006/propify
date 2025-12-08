@@ -38,3 +38,4 @@ export const deletePropertyAcion = async (id:Number) => {
   const deleteProperty = await db.delete(PropertyTable).where(eq(PropertyTable.id,Number(id)))
   return true
 }
+

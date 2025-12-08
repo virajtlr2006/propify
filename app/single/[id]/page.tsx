@@ -13,35 +13,50 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button'
+import { useCurrentUser } from '@/hook/hook'
+import { log } from 'console'
 
 const page = () => {
 
     const [showSingleProperty, setshowSingleProperty] = useState<property | null>(null)
+    const [isdelete, setIsdelete] = useState(false)
 
     const router = useRouter()
-
     const { id } = useParams()
-
+    const { email } = useCurrentUser()
+    // console.log(email);
+    
     useEffect(() => {
-        if (id) getSingleProp(Number(id))
-    }, [id])
+        if (id && email) getSingleProp(Number(id))
+    }, [id,email])
 
 
     const getSingleProp = async (id: number) => {
+        console.log(isdelete);
         const single: property = await SinglePropertyAction(id)
+        if(email){
+            if(email == single.email){
+                setIsdelete(true)
+            }
+            // console.log(email)
+            // console.log(single.email)
+        }
         setshowSingleProperty(single)
+        
     }
 
     const deleteProperty = async (id: Number) => {
-        await deletePropertyAcion(Number(id))
-        router.push("/all")
+        if (email == showSingleProperty?.email) {
+            await deletePropertyAcion(Number(id))
+            router.push("/all")
+        }
     }
 
     return (
         <div>
             {showSingleProperty &&
                 <div>
-                    <img src={showSingleProperty.image || "Propert Image"} />
+                    <img src={showSingleProperty.image || "Property Image"} />
                     <p>{showSingleProperty.pname}</p>
                     <p>{showSingleProperty.ptype}</p>
                     <p>{showSingleProperty.pdesc}</p>
@@ -53,7 +68,7 @@ const page = () => {
                     <p>{showSingleProperty.email}</p>
 
                     <Dialog>
-                        <DialogTrigger>Delete</DialogTrigger>
+                        {isdelete && <DialogTrigger>Delete</DialogTrigger>}
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Are you absolutely sure?</DialogTitle>
@@ -62,7 +77,12 @@ const page = () => {
                                     and remove your data from our servers.
                                 </DialogDescription>
                             </DialogHeader>
-                            <Button onClick={() => deleteProperty(showSingleProperty.id)} variant="outline">Delete</Button>
+
+                            {isdelete &&
+                                <Button onClick={() => deleteProperty(showSingleProperty.id)} variant="outline">
+                                    <p>Delete</p>
+                                </Button>
+                            }
                         </DialogContent>
                     </Dialog>
                 </div>
