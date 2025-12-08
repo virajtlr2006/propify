@@ -4,8 +4,11 @@ import { useForm, SubmitHandler } from "react-hook-form"
 import { newPropertyAction } from "@/Actions/PropertyAction"
 import { useCurrentUser } from "@/hook/hook"
 import { newProperty } from "@/db/schema"
+import { useRouter } from "next/navigation"
 
 const Page = () => {
+
+  const router = useRouter()
 
   const {email} = useCurrentUser()
   
@@ -20,6 +23,7 @@ const onSubmit = async (data:newProperty) => {
   if(!email) return
   const newdata = {...data , email:email || ""}
   await newPropertyAction(newdata)
+  router.push("/all")
 }
   return (
     <div className="p-6 max-w-xl mx-auto">

@@ -1,6 +1,6 @@
 'use server';
 
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "..";
 import { newProperty, PropertyTable } from "@/db/schema";
 import { strict } from "assert";
@@ -9,7 +9,8 @@ import { strict } from "assert";
 export const newPropertyAction = async (data: newProperty) => {
   // console.log(data)
   const result = await db.insert(PropertyTable).values(data);
-  return result;
+  console.log(result)
+  // return true;
 };
 
 // Single Property Action
@@ -21,13 +22,19 @@ export const SinglePropertyAction = async (id:Number) => {
 
 // All Property Action
 export const AllPropertyAction =  async () => {
-  const all = await db.select().from(PropertyTable)
+  const all = await db.select().from(PropertyTable).orderBy(asc(PropertyTable.pname))
   // console.log(all)
   return all
 }
 
 // User All roperty Action
 export const UserAllPropertyAction = async (email:string) => {
-  const userall = await db.select().from(PropertyTable).where(eq(PropertyTable.email,email))
+  const userall = await db.select().from(PropertyTable).where(eq(PropertyTable.email,email)).orderBy(asc(PropertyTable.pname))
   return userall
+}
+
+// Delete Property Action
+export const deletePropertyAcion = async (id:Number) => {
+  const deleteProperty = await db.delete(PropertyTable).where(eq(PropertyTable.id,Number(id)))
+  return true
 }
