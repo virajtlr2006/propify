@@ -14,48 +14,53 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hook/hook'
-import { log } from 'console'
 
-const page = () => {
-
-    const [showSingleProperty, setshowSingleProperty] = useState<property | null>(null)
-    const [isdelete, setIsdelete] = useState(false)
+const Page = () => {
+    // state to hold the property details
+    const [showSingleProperty, setShowSingleProperty] = useState<property | null>(null)
+    // flag to check if current user is the owner
+    const [isOwner, setIsOwner] = useState(false)
 
     const router = useRouter()
-    const { id } = useParams()
-    const { email } = useCurrentUser()
-    // console.log(email);
-    
+    const { id } = useParams() // get property id from URL
+    const { email } = useCurrentUser() // get logged-in user's email
+
+    // fetch property whenever id or email changes
     useEffect(() => {
         if (id && email) getSingleProp(Number(id))
-    }, [id,email])
+    }, [id, email])
 
-
+    // function to fetch single property by id
     const getSingleProp = async (id: number) => {
-        console.log(isdelete);
         const single: property = await SinglePropertyAction(id)
-        if(email){
-            if(email == single.email){
-                setIsdelete(true)
-            }
-            // console.log(email)
-            // console.log(single.email)
+        if (email && single) {
+            // check if logged-in user owns this property
+            setIsOwner(email === single.email)
         }
-        setshowSingleProperty(single)
-        
+        // store property details in state
+        setShowSingleProperty(single)
     }
 
-    const deleteProperty = async (id: Number) => {
-        if (email == showSingleProperty?.email) {
+    // function to delete property if owner
+    const deleteProperty = async (id: number) => {
+        if (isOwner) {
             await deletePropertyAcion(Number(id))
-            router.push("/all")
+            router.push("/all") // redirect after delete
+        }
+    }
+
+    // function to go to update page if owner
+    const goToUpdate = (id: number) => {
+        if (isOwner) {
+            router.push(`/update/${id}`) // navigate to update form page
         }
     }
 
     return (
         <div>
-            {showSingleProperty &&
+            {showSingleProperty && (
                 <div>
+                    {/* property details */}
                     <img src={showSingleProperty.image || "Property Image"} />
                     <p>{showSingleProperty.pname}</p>
                     <p>{showSingleProperty.ptype}</p>
@@ -67,8 +72,9 @@ const page = () => {
                     <p>{showSingleProperty.price}</p>
                     <p>{showSingleProperty.email}</p>
 
+                    {/* Delete Dialog - only visible if owner */}
                     <Dialog>
-                        {isdelete && <DialogTrigger>Delete</DialogTrigger>}
+                        {isOwner && <DialogTrigger>Delete</DialogTrigger>}
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Are you absolutely sure?</DialogTitle>
@@ -78,17 +84,31 @@ const page = () => {
                                 </DialogDescription>
                             </DialogHeader>
 
-                            {isdelete &&
-                                <Button onClick={() => deleteProperty(showSingleProperty.id)} variant="outline">
-                                    <p>Delete</p>
+                            {isOwner && (
+                                <Button
+                                    onClick={() => deleteProperty(showSingleProperty.id)}
+                                    variant="outline"
+                                >
+                                    Delete
                                 </Button>
-                            }
+                            )}
                         </DialogContent>
                     </Dialog>
+
+                    {/* Update Button - only visible if owner */}
+                    {isOwner && (
+                        <Button
+                            onClick={() => goToUpdate(showSingleProperty.id)}
+                            variant="default"
+                            className="mt-4"
+                        >
+                            Update
+                        </Button>
+                    )}
                 </div>
-            }
+            )}
         </div>
     )
 }
 
-export default page
+export default Page
